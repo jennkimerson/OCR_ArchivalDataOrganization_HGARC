@@ -28,7 +28,7 @@ Reduce the background noise in images for accurate scanning
 __III. Scan__
 Scan the image and extract the text and create a text file
 
-__IV. Clen Text__
+__IV. Clean Text__
 Split the string down to individual lines, then separate on spacing from left
 
 __V. Extract Prompt__
