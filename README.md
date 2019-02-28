@@ -1,9 +1,16 @@
 # Archival Data Organization for Howard Gotlieb Archival Research Center (HGARC) 2019 #
 
 ## The Project: ##
-
+Converting a PDF scan of a Finding Aid into an Excel Spreadsheet, with individual items sorted under their respective categories.
 ## Versions: ##
 ### Mk. 1 ###
+* Find document
+* Ghost4J: PDF -> Series of images
+* Tesseract OCR: Images[] -> String[] (regarding whitespace)
+* Split String into String[] by "\n"
+* Mill through the entire list and sort things into a new arrat cluster[] based on the #spaces from left line until words (this somewhat works)
+* Prompt user for categories
+* Make and arrange Excel spreadsheet based on cluster[]
 
 #### Problems: ####
 * Inaccurate text conversion due to white space deletions
