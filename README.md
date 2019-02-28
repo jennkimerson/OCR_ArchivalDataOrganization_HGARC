@@ -39,7 +39,7 @@ __IV. Clean Text__
 Split the string down to individual lines, then separate on spacing from left
 
 __V. Extract Prompt__
-Construct a depth-;ost strictire based off of prompt
+Construct a depth structure based off of prompt
 * Considered creating a program to tag the beginning of the type space to keep the white space
 
 __VI. Data Categorization__
