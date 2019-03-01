@@ -2,39 +2,37 @@
 
 ## The Project: ##
 Converting a PDF scan of a Finding Aid into an Excel Spreadsheet, with individual items sorted under their respective categories.
-## Versions: ##
+## Current Version: Mk. 2 ##
 __Previous versions can be found in our Wiki Page__
 
-### Current Version: Mk. 2 ###
-
-#### Primary Revisions from Mk. 1 ####
+### Primary Revisions from Mk. 1 ###
 * Image editing step deseriable
   * Refined preservation of indentation / space counting
 * "Clustering" overhaul due to multi-leveled lines
 * Consideration of potential switch / usage to Python from Java
 * Improve OCR or create common error patcher
 
-#### Project Plan ####
-__I. File Conversion__
+### Project Plan ###
+#### I. File Conversion ####
 Break large PDF files of Archival Data (Inventories, Descriptions, Listings) to smaller series of images to allow the OCR string to fit
 
-__II. Clean File__
+#### II. Clean File ####
 Reduce the background noise in images for accurate scanning
 
-__III. Scan__
+#### III. Scan ####
 Scan the image and extract the text and create a text file
 
-__IV. Clean Text__
+#### IV. Clean Text ####
 Split the string down to individual lines, then separate on spacing from left
 
-__V. Extract Prompt__
+#### V. Extract Prompt ####
 Construct a depth structure based off of prompt
 * Considered creating a program to tag the beginning of the type space to keep the white space
 
-__VI. Data Categorization__
+#### VI. Data Categorization ####
 Categorize the data
 
-__VII. Reassemble Data__
+#### VII. Reassemble Data ####
 Create a CSV or Excel file with the processed data
 
 
