@@ -3,20 +3,9 @@
 ## The Project: ##
 Converting a PDF scan of a Finding Aid into an Excel Spreadsheet, with individual items sorted under their respective categories.
 ## Versions: ##
-### Mk. 1 ###
-* Find document
-* Ghost4J: PDF -> Series of images
-* Tesseract OCR: Images[] -> String[] (regarding whitespace)
-* Split String into String[] by "\n"
-* Mill through the entire list and sort things into a new arrat cluster[] based on the #spaces from left line until words (this somewhat works)
-* Prompt user for categories
-* Make and arrange Excel spreadsheet based on cluster[]
+__Previous versions can be found in our Wiki Page__
 
-#### Problems: ####
-* Inaccurate text conversion due to white space deletions
-  * Indentations mark categories of the source, thus curicial in archival data organization
-
-### Mk. 2 ###
+### Current Version: Mk. 2 ###
 
 #### Primary Revisions from Mk. 1 ####
 * Image editing step deseriable
@@ -57,3 +46,6 @@ Create a CSV or Excel file with the processed data
 
 ## Team Members:
 Jennifer (Jaehei) Kim, Richard Xiao
+
+## Supervisor:
+Claudia Friedel
