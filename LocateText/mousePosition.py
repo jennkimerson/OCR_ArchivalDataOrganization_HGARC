@@ -1,5 +1,5 @@
-# Displays the mouse cursor's current position.
 # Trial before identifying text coordinate.
+# Displays the mouse cursor's current position.
 
 import pyautogui
 
