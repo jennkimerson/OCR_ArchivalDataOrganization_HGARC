@@ -1,3 +1,5 @@
+// reads in the text vertically
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
