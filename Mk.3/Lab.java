@@ -38,7 +38,7 @@ public class Lab
 		inst.setTessVariable("tessedit_create_hocr", "1");
 		
 		//inst.setHocr(true);
-		inst.setPageSegMode(5); //PSM_SINGLE_COLUMN
+		inst.setPageSegMode(5); //PSM_SINGLE_COLUMN_VERT_TEXT
 		
 		String words = "";
 		
