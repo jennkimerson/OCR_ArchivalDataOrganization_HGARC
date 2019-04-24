@@ -2,6 +2,12 @@
 
 ## The Project: ##
 Converting a PDF scan of a Finding Aid into an Excel Spreadsheet, with individual items sorted under their respective categories.
+
+## In Development: Mk. 3 ##
+* Scan vertically, to determine how many lines are in each column
+* Scan horizontally, to determine the actual words
+* Run through each vertical String searching for its horizontal counterpart, which pinpoints how far away each horizontal string begins from the left
+
 ## Current Version: Mk. 2 ##
 __Previous versions can be found in our Wiki Page__
 
