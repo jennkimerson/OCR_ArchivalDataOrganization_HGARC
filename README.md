@@ -19,7 +19,7 @@ Read in PDF to images
 #### III. Enhance Image ####
 Reduce the background noise in images for accurate scanning
 
-#### III - IV. Horizontal and Vertical Scan ####
+#### IV - V. Horizontal and Vertical Scan ####
 Scan the image and extract the text and create a text file, both horizontally and vertically
 
 * Scan vertically, to determine how many lines are in each column
@@ -27,16 +27,16 @@ Scan the image and extract the text and create a text file, both horizontally an
 * Run through each vertical String searching for its horizontal counterpart, which pinpoints how far away each horizontal string begins from the left
 * Must override pre-set language settings (i.e. English reads in text from left to right)
 
-#### V. Transpose ####
+#### VI. Transpose ####
 Transpose the vertically scanned result to horizontal
 
-#### VI. Quality Check ####
+#### VII. Quality Check ####
 Match the transposed vertical text file with horizontally scanned result to quality check
 
-#### VII. Structure Selection & Data Categorization ####
+#### VIII. Structure Selection & Data Categorization ####
 Prompts the user for structure (formatting and organization of data)
 
-#### VIII. Reassemble Data ####
+#### IX. Reassemble Data ####
 Create a CSV or Excel file with the processed data
 
 ## Team Members:
