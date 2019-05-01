@@ -16,7 +16,7 @@ Prompts the user to select pages they want to read in.
 #### II. File Conversion ####
 Read in PDF to images
 
-#### III. Clean File ####
+#### III. Enhance Image ####
 Reduce the background noise in images for accurate scanning
 
 #### III - IV. Horizontal and Vertical Scan ####
