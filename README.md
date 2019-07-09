@@ -1,43 +1,13 @@
 # Archival Data Organization for Howard Gotlieb Archival Research Center (HGARC) 2019 #
 
 ## The Project: ##
-Converting a PDF scan of a Finding Aid into an Excel Spreadsheet, with individual items sorted under their respective categories.
+This program was developed by Jennifer Kim and Richard Xiao to convert PDFs of legacy data into the Excel listing format for further parsing as it pertains to ontological standards. Both Jennifer and Richard have been experimenting with different approaches to account for variables and data anomalies in Finding Aids produced over the past 50 years at Howard Gotlieb Archival Research Center.  Scripts in Python, Java, C++, and Golang  are used  to implement Tesseract, OpenCV, and EAST  (Efficient Accurate Scene Text Detector) to harvest  the data. All of this is to retain the integrity of the data. 
 
-## Current Version In Development: Mk. 3 ##
+Out of the box design thinking has proved to be the best way to tackle this project. Most traditional programs will disregard formatting and indentations aka whitespace.  This is how one organizes human readable information, in order to make it machine readable the students aim to train the program to adjust for the variability of each document. This is accomplished through machine learning and increased accuracy of white space preservation.
+
+
+## Current Version In Development: Mk. 4 ##
 __Previous versions can be found in our Wiki Page__
-
-### Primary Revisions from Mk. 2 ###
-* Accurate white space preservation method
-
-### Project Plan ###
-#### I. Data Selection ####
-Prompts the user to select pages they want to read in.
-
-#### II. File Conversion ####
-Read in PDF to images
-
-#### III. Enhance Image ####
-Reduce the background noise in images for accurate scanning
-
-#### IV - V. Horizontal and Vertical Scan ####
-Scan the image and extract the text and create a text file, both horizontally and vertically
-
-* Scan vertically, to determine how many lines are in each column
-* Scan horizontally, to determine the actual words
-* Run through each vertical String searching for its horizontal counterpart, which pinpoints how far away each horizontal string begins from the left
-* Must override pre-set language settings (i.e. English reads in text from left to right)
-
-#### VI. Transpose ####
-Transpose the vertically scanned result to horizontal
-
-#### VII. Quality Check ####
-Match the transposed vertical text file with horizontally scanned result to quality check
-
-#### VIII. Structure Selection & Data Categorization ####
-Prompts the user for structure (formatting and organization of data)
-
-#### IX. Reassemble Data ####
-Create a CSV or Excel file with the processed data
 
 ## Team Members:
 Jennifer (Jaehei) Kim, Richard Xiao
