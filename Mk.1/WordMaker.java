@@ -1,6 +1,9 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -9,6 +12,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 import org.apache.poi.xwpf.usermodel.*;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 
@@ -33,7 +37,7 @@ public class WordMaker
 	public static void main(String[] args) throws Exception
 	{
 		spacer();
-		System.out.println("HGARC Excel To Word Conversion Program, Version 1.2");
+		System.out.println("HGARC Excel To Word Conversion Program, Version 1.2.1");
 		System.out.println("Programmed by Sarah Shahinpour and Richard Xiao");
 		spacer();
 		System.out.println("Process initiated...");
@@ -49,7 +53,7 @@ public class WordMaker
 		
 		Scanner reader = new Scanner(System.in);
 		String input = "", inLocation, outLocation;
-		while(true)
+		for(;;)
 		{
 			System.out.println("What would you like to convert? (Select one of the options below)");
 			System.out.println("[File] [Folder] [Exit]");
@@ -66,13 +70,38 @@ public class WordMaker
 			
 			if(input.equals("File"))
 			{
-				System.out.print("Please enter the location of the Excel spreadsheet: ");
-				inLocation = reader.nextLine();
-				File spread = new File(inLocation);
+				File spread = null;
+				for(;;)
+				{
+					System.out.print("Please enter the location of the Excel spreadsheet: ");
+					inLocation = reader.nextLine();
+					spread = new File(inLocation);
+					if(!spread.exists())
+						System.out.println("File does not exist - please try again.");
+					else if(spread.isDirectory())
+						System.out.println("Folder found - please enter the location of a file");
+					else if(!FilenameUtils.getExtension(inLocation).equals("xlsx"))
+						System.out.println("Cannot read non-Excel spreadsheets - please enter the path of an Excel spreadsheet");
+					else
+						break;			
+				}
+				System.out.println("Excel spreadsheet found.");
 				spacer();
 				
-				System.out.print("Please enter the desired output location of the Word document: ");
-				outLocation = reader.nextLine();
+				for(;;)
+				{
+					System.out.print("Please enter the desired output location of the Word document: ");
+					outLocation = reader.nextLine();
+					if(Files.notExists(Paths.get(outLocation)))
+						System.out.println("Path does not exist - please try again");
+					else if(!new File(outLocation).isDirectory())
+						System.out.println("Path results in a file - please enter the path of a directory");
+					else if(outLocation.charAt(outLocation.length() - 1) != '\\')
+						System.out.println("Please append a \\ to the folder location");
+					else	
+						break;
+				}
+				System.out.println("Output location found.");
 				spacer();
 				
 				FileOutputStream out = new FileOutputStream(new File(outLocation + scanWrite(spread) + ".docx"));
@@ -84,30 +113,70 @@ public class WordMaker
 			else if(input.equals("Folder"))
 			{
 				//File folder = new File("Z:\\Pending Preliminary Listings\\FADI Excel Listings");
-				System.out.print("Please enter the location of the folder: ");
-				inLocation = reader.nextLine();
-				File folder = new File(inLocation);
+				File folder = null;
+				File[] folderFiles = null;
+				boolean[] isSheet = null;
+				int sheetCount = 0;
+				for(;;)
+				{
+					System.out.print("Please enter the location of the folder: ");
+					inLocation = reader.nextLine();
+					folder = new File(inLocation);
+					if(!folder.exists())
+						System.out.println("File does not exist - please try again.");
+					else if(folder.isFile())
+						System.out.println("File found - please enter the location of a folder");
+					else
+					{
+						System.out.println("Folder found - checking for Excel spreadsheets");
+						folderFiles = folder.listFiles();
+						
+						if(folderFiles.length != 0)
+						{
+							isSheet = new boolean[folderFiles.length];
+							for(int i = 0; i < folderFiles.length; i++)
+								if(FilenameUtils.getExtension(folderFiles[i].getPath()).equals("xlsx"))
+								{
+									isSheet[i] = true;
+									sheetCount++;
+								}
+						}
+						if(sheetCount > 0)
+							break;
+						System.out.println("No Excel spreadsheets found inside folder - please enter a different folder");
+					}
+				}			
+				System.out.println("Folder contains " + sheetCount + " Excel spreadsheets");
 				spacer();
 				
-				System.out.print("Please enter the desired output location of the Word documents: ");
-				outLocation = reader.nextLine();
+				for(;;)
+				{
+					System.out.print("Please enter the desired output location of the Word documents: ");
+					outLocation = reader.nextLine();
+					if(Files.notExists(Paths.get(outLocation)))
+						System.out.println("Path does not exist - please try again");
+					else if(!new File(outLocation).isDirectory())
+						System.out.println("Path results in a file - please enter the path of a directory");
+					else if(outLocation.charAt(outLocation.length() - 1) != '\\')
+						System.out.println("Please append a \\ to the folder location");
+					else	
+						break;
+				}
+				System.out.println("Output location found.");
 				spacer();
-				
-				File[] folderFiles = folder.listFiles();
-				
-		        if(folderFiles != null)
+	
+		        for(int i = 0; i < folderFiles.length; i++)
 		        {
-		        	System.out.println("Folder found.");
-		        	for(File spread : folderFiles)
+		        	//FileOutputStream out = new FileOutputStream(new File("C:\\Users\\student\\Desktop\\Hatchet\\WordDocuments/" + scanWrite(spread) +".docx"));
+		        	if(isSheet[i])
 		        	{
-		        		//FileOutputStream out = new FileOutputStream(new File("C:\\Users\\student\\Desktop\\Hatchet\\WordDocuments/" + scanWrite(spread) +".docx"));
-		        		FileOutputStream out = new FileOutputStream(new File(outLocation + scanWrite(spread) +".docx"));
-		        		doc.write(out);
-		        		out.close();
-		        	}
+		        		FileOutputStream out = new FileOutputStream(new File(outLocation + scanWrite(folderFiles[i])) +".docx");
+			        	doc.write(out);
+			        	out.close();
+		        	} 	
+		        }
 		        
 				System.out.println("Mission accomplished!");
-		        }
 			}
 			else if(input.equals("Exit"))
 			{
@@ -129,160 +198,190 @@ public class WordMaker
 		//Each Excel spreadsheet should only have content in one sheet, after all.
 		FileInputStream ExcelFileToRead = new FileInputStream(spreadsheet);
         XSSFWorkbook wb = new XSSFWorkbook(ExcelFileToRead);
-        XSSFSheet sheet = wb.getSheetAt(0);
+        String collection = "";
+        int loopCount = 0;
+        int crashPortion = 0;
         
-        /*
-        	In the Apache POI (which we are using to work with Excel spreadsheets), a document, which is a workbook, is comprised of sheets.
-         	Sheets, in turn, are comprised of rows, which themselves are comprised of cells.
-         	In order to select a particular cell, we must choose a row, then a cell number.
-         	This is similar to a 2D Cartesian coordinate system, where each point can be denoted with two values, (x, y).
-         	The initialization of the two variables [row] and [cell] effectively act as these two values throughout <scanWrite>.
-        */
-        XSSFRow row; 
-        XSSFCell cell;
-		
-        //The variables below will denote the columns for the categories in the spreadsheet.
-        //In the case where the category does not exist, the value of its respective variable will be -1.
-        int collectionName = -1, collectionId = -1, accessionDate = -1, cont1 = -1, cont1Start = -1, cont1End = -1, 
-        	cont2 = -1, cont2Start = -1, cont2End = -1, series = -1, subseries = -1, subsubseries = -1, heading = -1, 
-        	description = -1, medium = -1, form = -1, dateExpression = -1, namedEntities = -1, beginDate = -1, endDate = -1;
-        
-        //The first row of the sheet should contain all categories used in the sheet.
-        //With the next two lines of code, the first row is obtained, and a Cell iterator is created.
-        //The Cell iterator progress cell by cell, which is effectively moving column by column.
-        XSSFRow firstRow = sheet.getRow(0);
-        Iterator<Cell> firstCells = firstRow.cellIterator();
-        
-        //This portion of code is supposed to assign the categories to their respective columns.
-        //Note that if a cell has content of "Sub subseries", it will not update the [subsubseries] variable.
-        //It might be a good choice later on to disregard case.
-        while (firstCells.hasNext())
+        try
         {
-            cell = (XSSFCell) firstCells.next();   
-            if (cell.getStringCellValue().equals("Collection Name"))
-                collectionName = cell.getColumnIndex();
-            else if(cell.getStringCellValue().equals("Collection ID"))
-                collectionId = cell.getColumnIndex();
-            else if(cell.getStringCellValue().equals("Accession Date"))
-	            accessionDate = cell.getColumnIndex();
-            else if(cell.getStringCellValue().equals("Cont 1"))
-                cont1 = cell.getColumnIndex();  	
-            else if(cell.getStringCellValue().equals("Cont 1 Start"))
-                cont1Start = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Cont 1 End"))
-                cont1End = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Cont 2"))
-                cont2 = cell.getColumnIndex();           	
-            else if(cell.getStringCellValue().equals("Cont 2 Start"))
-                cont2Start = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Cont 2 End"))
-                cont2End = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Series"))
-                series = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Subseries"))
-                subseries = cell.getColumnIndex();            	
-            //Subsubseries must be written in the manner below.
-            else if(cell.getStringCellValue().equals("Subsubseries"))
-                subsubseries = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Heading"))
-                heading = cell.getColumnIndex();           	
-            else if(cell.getStringCellValue().equals("Description"))
-                description = cell.getColumnIndex();           	
-            else if(cell.getStringCellValue().equals("Medium"))
-                medium = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Form"))
-                form = cell.getColumnIndex();
-            else if(cell.getStringCellValue().equals("Date Expression"))
-                dateExpression = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("Named Entities"))
-                namedEntities = cell.getColumnIndex();
-            else if(cell.getStringCellValue().equals("Begin Date"))
-                beginDate = cell.getColumnIndex();            	
-            else if(cell.getStringCellValue().equals("End Date"))
-                endDate = cell.getColumnIndex();
-        }
-        
-        /*
-        	The below four values are created for proper numbering purposes.
-        	[boxTracker] counts the boxes within each collection.
-        	[seriesTracker] counts the series within each box, numbered Roman numerically.
-        	[subseriesTracker] counts the subseries within each series, numbered alphabetically.
-        	[headingTracker] counts the items within each subseries (or series if subseries doesn't exist), numbered numerically.
-        */
-        int boxTracker;
-        String seriesTracker;
-        String subseriesTracker;//might not always exist
-        String headingTracker; 	//also might not always exist
-        
-        //The name of the collection is obtained by accessing the first row of data.
-        //Collection names should be the same throughout the spreadsheet.
-        //[collection] is printed out to show which spreadsheet the program is operating on, for debugging purposes.
-        String collection = sheet.getRow(1).getCell(collectionName).getStringCellValue();
-        System.out.println(collection);
-        
-        //[doc] and [content] are initialized. 
-        //[content] will be updated throughout the rest of the code until finally being put onto [doc] in the main method.
-        //[df] is implemented so that the String values of cells will be properly returned.
-        doc = new XWPFDocument();
-        content = new ArrayList<XWPFParagraph>();
-        DataFormatter df = new DataFormatter();
-
-		//The heading for the document is created.
-        //The collection name, collection ID, and accession dates are properly printed.
-        makeNewRun("C", 0, 0);
-		activeRun.setText(collection);
-		activeRun.addBreak();
-		activeRun.setText("" + df.formatCellValue(sheet.getRow(1).getCell(collectionId)));
-		activeRun.addBreak();
-		Iterator<Row> accessionRows = sheet.rowIterator();
-		row = (XSSFRow) accessionRows.next();
-		row = (XSSFRow) accessionRows.next(); //hopping to the second row, AKA the first content row
-		
-		//The following loop searches for all unique accession dates throughout the spreadsheet.
-		String currentAccessionDate = df.formatCellValue(row.getCell(accessionDate));
-		String accessionExpression = currentAccessionDate;
-		while(!df.formatCellValue(row.getCell(accessionDate)).isEmpty())
-		{
-			if(!(currentAccessionDate.equals(df.formatCellValue(row.getCell(accessionDate))))) {
-				accessionExpression =  accessionExpression + ", " + df.formatCellValue(row.getCell(accessionDate));
-				currentAccessionDate = df.formatCellValue(row.getCell(accessionDate));
+	        /*
+	        	In the Apache POI (which we are using to work with Excel spreadsheets), a document, which is a workbook, is comprised of sheets.
+	         	Sheets, in turn, are comprised of rows, which themselves are comprised of cells.
+	         	In order to select a particular cell, we must choose a row, then a cell number.
+	         	This is similar to a 2D Cartesian coordinate system, where each point can be denoted with two values, (x, y).
+	         	The initialization of the two variables [row] and [cell] effectively act as these two values throughout <scanWrite>.
+	        */
+        	
+        	// SECTION ZERO - INITIALIZATION OF SPREADSHEET AND DEFINITION OF COLUMNS
+        	XSSFSheet sheet = wb.getSheetAt(0);
+        	
+	        XSSFRow row; 
+	        XSSFCell cell;
+			
+	        //The variables below will denote the columns for the categories in the spreadsheet.
+	        //In the case where the category does not exist, the value of its respective variable will be -1.
+	        int collectionName = -1, collectionId = -1, accessionDate = -1, cont1 = -1, cont1Start = -1, cont1End = -1, 
+	        	cont2 = -1, cont2Start = -1, cont2End = -1, groupSeries = -1, series = -1, subseries = -1, subsubseries = -1, heading = -1, 
+	        	description = -1, medium = -1, form = -1, dateExpression = -1, namedEntities = -1, beginDate = -1, endDate = -1;
+	        
+	        //The first row of the sheet should contain all categories used in the sheet.
+	        //With the next two lines of code, the first row is obtained, and a Cell iterator is created.
+	        //The Cell iterator progress cell by cell, which is effectively moving column by column.
+	        XSSFRow firstRow = sheet.getRow(0);
+	        Iterator<Cell> firstCells = firstRow.cellIterator();
+	        
+	        //This portion of code is supposed to assign the categories to their respective columns.
+	        //Note that if a cell has content of "Sub subseries", it will not update the [subsubseries] variable.
+	        //It might be a good choice later on to disregard case.
+	        while (firstCells.hasNext())
+	        {
+	            cell = (XSSFCell) firstCells.next();   
+	            if (cell.getStringCellValue().equals("Collection Name"))
+	                collectionName = cell.getColumnIndex();
+	            else if(cell.getStringCellValue().equals("Collection Number"))
+	                collectionId = cell.getColumnIndex();
+	            else if(cell.getStringCellValue().equals("Accession Date"))
+		            accessionDate = cell.getColumnIndex();
+	            else if(cell.getStringCellValue().equals("Cont 1"))
+	                cont1 = cell.getColumnIndex();  	
+	            else if(cell.getStringCellValue().equals("Cont 1 Start"))
+	                cont1Start = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("Cont 1 End"))
+	                cont1End = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("Cont 2"))
+	                cont2 = cell.getColumnIndex();           	
+	            else if(cell.getStringCellValue().equals("Cont 2 Start"))
+	                cont2Start = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("Cont 2 End"))
+	                cont2End = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equalsIgnoreCase("Grouping Series"))
+	            	groupSeries = cell.getColumnIndex();
+	            else if(cell.getStringCellValue().equals("Series"))
+	                series = cell.getColumnIndex();             	
+	            else if(cell.getStringCellValue().equals("Subseries"))
+	                subseries = cell.getColumnIndex();            	
+	            //Subsubseries must be written in the manner below.
+	            else if(cell.getStringCellValue().equals("Subsubseries"))
+	                subsubseries = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("Heading"))
+	                heading = cell.getColumnIndex();           	
+	            else if(cell.getStringCellValue().equals("Description"))
+	                description = cell.getColumnIndex();           	
+	            else if(cell.getStringCellValue().equals("Medium"))
+	                medium = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("Form"))
+	                form = cell.getColumnIndex();
+	            else if(cell.getStringCellValue().equals("Date Expression"))
+	                dateExpression = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("Named Entities"))
+	                namedEntities = cell.getColumnIndex();
+	            else if(cell.getStringCellValue().equals("Begin Date"))
+	                beginDate = cell.getColumnIndex();            	
+	            else if(cell.getStringCellValue().equals("End Date"))
+	                endDate = cell.getColumnIndex();
+	        }
+	        
+	        /*
+	        	The below four values are created for proper numbering purposes.
+	        	[boxTracker] counts the boxes within each collection.
+	        	[seriesTracker] counts the series within each box, numbered Roman numerically.
+	        	[subseriesTracker] counts the subseries within each series, numbered alphabetically.
+	        	[headingTracker] counts the items within each subseries (or series if subseries doesn't exist), numbered numerically.
+	        */
+	        
+	        // SECTION ONE - ASSEMBLY OF HEADER
+	        crashPortion = 1;
+	        
+	        int boxTracker;
+	        String groupTracker = null;		//might not always exist
+	        boolean sameGroup = true; 				//only used if groups exist
+	        String seriesTracker;
+	        String subseriesTracker;	//also might not always exist
+	        String subsubseriesTracker = ""; //ditto
+	        String headingTracker; 		//see above
+	        
+	        //The name of the collection is obtained by accessing the first row of data.
+	        //Collection names should be the same throughout the spreadsheet.
+	        //[collection] is printed out to show which spreadsheet the program is operating on, for debugging purposes.
+	        collection = sheet.getRow(1).getCell(collectionName).getStringCellValue();
+	        System.out.println("Now scanning: " + collection);
+	        
+	        //[doc] and [content] are initialized. 
+	        //[content] will be updated throughout the rest of the code until finally being put onto [doc] in the main method.
+	        //[df] is implemented so that the String values of cells will be properly returned.
+	        doc = new XWPFDocument();
+	        content = new ArrayList<XWPFParagraph>();
+	        DataFormatter df = new DataFormatter();
+	
+			//The heading for the document is created.
+	        //The collection name, collection ID, and accession dates are properly printed.
+	        makeNewRun("C", 0, 0);
+			activeRun.setText(collection);
+			activeRun.addBreak();
+			activeRun.setText("" + df.formatCellValue(sheet.getRow(1).getCell(collectionId)));
+			activeRun.addBreak();
+			Iterator<Row> accessionRows = sheet.rowIterator();
+			row = (XSSFRow) accessionRows.next();
+			row = (XSSFRow) accessionRows.next(); //hopping to the second row, AKA the first content row
+			
+			//The following loop searches for all unique accession dates throughout the spreadsheet.
+			String currentAccessionDate = df.formatCellValue(row.getCell(accessionDate));
+			String accessionExpression = currentAccessionDate;
+			while(!df.formatCellValue(row.getCell(accessionDate)).isEmpty())
+			{
+				if(!(currentAccessionDate.equals(df.formatCellValue(row.getCell(accessionDate))))) {
+					accessionExpression =  accessionExpression + ", " + df.formatCellValue(row.getCell(accessionDate));
+					currentAccessionDate = df.formatCellValue(row.getCell(accessionDate));
+				}
+				if(accessionRows.hasNext())
+					row = (XSSFRow) accessionRows.next();
+				else
+					break;
 			}
-			if(accessionRows.hasNext())
-				row = (XSSFRow) accessionRows.next();
-			else
-				break;
-		}
-		activeRun.setText(accessionExpression);	
-		activeRun.addBreak();
-		activeRun.setText("Preliminary Listing");	
+			activeRun.setText(accessionExpression);	
+			activeRun.addBreak();
+			activeRun.setText("Preliminary Listing");	
+			
+			//The following counters are created for the proper labeling of each row.
+			//As subseries and subsubseries are enumerated alphabetically, their types are set to char.
+			
+			// SECTION TWO - PRE-LOOP SETUP
+			crashPortion = 2;
+			
+			int romanNum, itemNum;
+			char subLetter, subsubLetter;
+			
+			//An iterator is created, and is set to start on the second row.
+			Iterator<Row> rows = sheet.rowIterator();
+			row = (XSSFRow) rows.next();
+	    	row = (XSSFRow) rows.next();
+	        
+			System.out.println("Looping...");
+			
+			/*
+				In general, the looping process is very recursive.
+				The series of loops slowly work their way from descriptive to broad identifiers.
+				Ordered from small-scale to large-scale, the ordering is: subsubseries, item, subseries, series, container.
+				Subsubseries and subseries do not always exist.
+			*/
 		
-		//The following counters are created for the proper labeling of each row.
-		//As subseries and subsubseries are enumerated alphabetically, their types are set to char.
-		int romanNum, itemNum;
-		char subLetter, subsubLetter;
-		
-		//An iterator is created, and is set to start on the second row.
-		Iterator<Row> rows = sheet.rowIterator();
-		row = (XSSFRow) rows.next();
-    	row = (XSSFRow) rows.next();
-        
-		System.out.println("Looping...");
-		int loopCount = 0;
-		
-		/*
-			In general, the looping process is very recursive.
-			The series of loops slowly work their way from descriptive to broad identifiers.
-			Ordered from small-scale to large-scale, the ordering is: subsubseries, item, subseries, series, container.
-			Subsubseries and subseries do not always exist.
-		*/
-		
-		try //For debugging purposes, a try-catch is set throughout the loop.
-        {	
 	        //The termination condition for the while loop below is the absence of another row.
 			//This should stop once there are no rows with content left.
 			while(rows.hasNext() && !row.getCell(collectionName).getStringCellValue().isEmpty())
 	        {	
-	        	//[boxTracker] is updated to the proper box count.
+	        	// SECTION THREE - CONTAINER 1 LAYER
+				crashPortion = 3;
+				
+				if(groupSeries != -1)
+				{
+					groupTracker = row.getCell(groupSeries).getStringCellValue();
+					
+					makeNewRun("L", 0, 0);
+					activeRun.setBold(true);
+					activeRun.setText(groupTracker);
+				}
+				
+				//[boxTracker] is updated to the proper box count.
 				boxTracker = (int) row.getCell(cont1Start).getNumericCellValue();
 	        	
 				//The box and its number is written in the document.
@@ -302,6 +401,9 @@ public class WordMaker
 	        	//This should stop once the selected item starts in a box value that is not [boxTracker].
 	            while(row.getCell(cont1Start).getNumericCellValue() == boxTracker) 
 	            {
+	            	// SECTION FOUR - SERIES LAYER
+	            	crashPortion = 4;
+	            	
 	            	//[seriesTracker] is updated to the current series.
 	            	seriesTracker = row.getCell(series).getStringCellValue();
 	            	
@@ -317,9 +419,16 @@ public class WordMaker
 	        		//This should stop once the selected item is in a different series than [seriesTracker].
 	        		while(row.getCell(series).getStringCellValue().equals(seriesTracker)) 
 	            	{
-	            		//[subseriesTracker] is updated to the current subseries.
+	            		// SECTION FIVE - SUBSERIES LAYER
+	        			
+	        			//[subseriesTracker] is updated to the current subseries.
 	        			subseriesTracker = row.getCell(subseries).getStringCellValue();
 	        			
+	        			if(subsubseries != -1)
+	        			{
+	        				subsubseriesTracker = row.getCell(subsubseries).getStringCellValue();	        					
+	        			}
+	        				   			
 	            		//As it is possible for there not to exist a subseries, such is checked.
 	        			//In this case, the items will just be printed.
 	        			//Otherwise, the subseries and its letter is written in the document.
@@ -327,8 +436,21 @@ public class WordMaker
 	        			if(!row.getCell(subseries).getStringCellValue().isEmpty())
 	        			{
 	        				makeNewRun("L", 2, 0);
-	        				activeRun.setText(subLetter++ + ". " + row.getCell(subseries).getStringCellValue());
+	        				if(subsubseries != -1 && !row.getCell(subsubseries).getStringCellValue().isEmpty())
+	        					activeRun.setText(subLetter++ + ". " + row.getCell(subseries).getStringCellValue() + " - " + row.getCell(subsubseries).getStringCellValue());
+	        				else
+	        					activeRun.setText(subLetter++ + ". " + row.getCell(subseries).getStringCellValue());
 	        			}
+	        			else
+	        			{
+	        				if(subsubseries != -1 && !row.getCell(subsubseries).getStringCellValue().isEmpty())
+	        				{
+	        					makeNewRun("L", 2, 0);
+		        				activeRun.setText(subLetter++ + ". (No subseries) - " + row.getCell(subsubseries).getStringCellValue());
+	        				}	        				
+	        			}
+	        				
+	        					
 	
 	            		//The item count is reset to 1 for each item.
 	        			itemNum = 1;
@@ -337,6 +459,11 @@ public class WordMaker
 	        			//This should stop once the selected item is in a different subseries than [subseriesTracker].
 	            		while(row.getCell(subseries).getStringCellValue().equals(subseriesTracker)) 
 	            		{
+	            			if(subsubseries != -1 && !row.getCell(subsubseries).getStringCellValue().equals(subsubseriesTracker))
+	            				break;
+	            			// SECTION SIX - ITEM LAYER: HEADER AND MOST DETAILS ASSEMBLY
+	            			crashPortion = 6;
+	            			
 	            			//[loopCount] represents the total amount of items added in each document.
 	            			//In the case of an exception being thrown, [loopCount] is reported.
 	            			//This is so it is possible to go to the associated row in the spreadsheet in which the code failed, helping debug it.
@@ -362,8 +489,11 @@ public class WordMaker
 		            					headerAndDetails = headerString + ",\" ";
 		            				else
 		            					headerAndDetails = headerString + "\" ";
-	            				}else if(!row.getCell(description).getStringCellValue().isEmpty())
+	            				}
+	            				else if(!row.getCell(description).getStringCellValue().isEmpty())
 		            					headerAndDetails = headerString + ", ";
+	            				else
+	            					headerAndDetails = headerString;
 	            				
 	            			}
 	            			if(!row.getCell(description).getStringCellValue().isEmpty())
@@ -374,6 +504,10 @@ public class WordMaker
 	            				headerAndDetails = headerAndDetails + ", " + df.formatCellValue(row.getCell(form));
 	            			if(!df.formatCellValue(row.getCell(namedEntities)).isEmpty())
 	            				headerAndDetails = headerAndDetails + "; " + df.formatCellValue(row.getCell(namedEntities));
+	            			
+	            			// SECTION SEVEN - ITEM LAYER: DATE EXPRESSION AND CONTAINER 2 ASSEMBLY
+	            			crashPortion = 7;
+	            			
 	            			if(!row.getCell(beginDate).toString().isEmpty())
 	            			{	
 	            				String begin = row.getCell(beginDate).toString();
@@ -404,40 +538,25 @@ public class WordMaker
 	            			
 	            			//[headingTracker] is updated for the current item.
 	            			headingTracker = row.getCell(heading).getStringCellValue();
-	            			
-	            			//In the case where [subsubseries] points to a column in the spreadsheet, this code will run.
-	            			if(subsubseries != -1)
-	            			{
-	            				//The [subsubLetter] is reset to 'a' for each item.
-	            				subsubLetter = 97;
-	            				
-	            				//The termination condition for the while loop below is a change in heading.
-	    	        			//This should stop once the selected item is in a different heading than [headingTracker].
-	            				while(row.getCell(heading).getStringCellValue().equals(headingTracker))
-	                			{
-	            					//The subsubseries and its letter are written in the document.
-	            	            	//Following the format, it will be indented four times.
-	            					makeNewRun("L", 4, 0);
-	                				activeRun.setText(subsubLetter++ + ". " + row.getCell(subsubseries).getStringCellValue() + ".");
-	                				
-	            					//In the case which there are no rows left, the loop will exit to avoid throwing an exception.
-	                				if(!rows.hasNext())
-	            						break;
-	            					row = (XSSFRow) rows.next();
-	                			}
-	            			}
-	            			else
-	            				//Similarly to the above, in the case which there are no rows left, the loop will exit to avoid throwing an exception.
-	            				if(!rows.hasNext())
-	            					break;
+
+	            			if(!rows.hasNext())
+	            				break;
 	            			
 	            			row = (XSSFRow) rows.next();
+	            			
+	            			if(groupSeries != -1)
+	            			{
+	            				sameGroup = row.getCell(groupSeries).getStringCellValue().equals(groupTracker);
+	            			}
+	            			
+	            			if(!sameGroup)
+	            				break;
 	            		}	//Exits subseries loop
 	            		//Once again, more conditions to exit the appropriate loops.
-	            		if(!rows.hasNext() || row.getCell(collectionName).getStringCellValue().isEmpty())
+	            		if(!rows.hasNext() || row.getCell(collectionName).getStringCellValue().isEmpty() || !sameGroup)
         					break;
 	            	}	//Exits series loop
-	        		if(!rows.hasNext() || row.getCell(collectionName).getStringCellValue().isEmpty())
+	        		if(!rows.hasNext() || row.getCell(collectionName).getStringCellValue().isEmpty() || !sameGroup)
     					break;
 	            }	//Exits box loop
 	        }	//Exits spreadsheet loop.
@@ -446,9 +565,61 @@ public class WordMaker
         catch(Exception e)
         {
         	//In case of a crash, the exception and row where the program failed will be printed.
-        	//The documented will not be created if this occurs.
-        	System.out.println(e);
-        	System.out.println(loopCount);
+        	//The document will not be created if this occurs.
+        	System.out.println("CRASH! ERROR EXCEPTION: " + e);
+        	System.out.println("Program crashed on row number: " + loopCount);
+        	switch(crashPortion)
+        	{
+        		case 0:
+        		{
+        			System.out.println("Crashed in the initialization - check for whether the spreadsheet actually had information.");
+        			break;
+        		}
+        		case 1:
+        		{
+        			System.out.println("Crashed in the header assembly - perhaps a field row was improperly named");
+        			break;
+        		}
+        		case 2:
+        		{
+        			System.out.println("Crashed in the pre-loop assembly - ensure that the spreadsheet has more than one row");
+        			break;
+        		}
+        		case 3:
+        		{
+        			System.out.println("Crashed in the Container 1 column");
+        			break;
+        		}
+        		case 4:
+        		{
+        			System.out.println("Crashed in the Series column");
+        			break;
+        		}
+        		case 5:
+        		{
+        			System.out.println("Crashed in the Subseries column");
+        			break;
+        		}
+        		case 6:
+        		{
+        			System.out.println("Crashed in the Header, Description, Medium, or Named Entities column");
+        			break;
+        		}
+        		case 7:
+        		{
+        			System.out.println("Crashed in the Date Expression or Container 2 column - check whether the dates are in the proper format");
+        			break;
+        		}
+        		case 8:
+        		{
+        			System.out.println("Crashed in the Subsubseries column");
+        			break;
+        		}
+        		default:
+        		{
+        			System.out.println("Glitch! You shouldn't be seeing this!");
+        		}
+        	}
         }
 		
         System.out.println("Scanning Complete.");
